@@ -61,8 +61,23 @@ func DownloadExcel(w http.ResponseWriter, r *http.Request) {
 		f.SetCellValue("Sheet1", fmt.Sprintf("D%d", i+startRow), v.Password)
 	}
 
-	// auto resize column
-	f.SetColWidth("Sheet1", "A", "D", 20)
+	// auto set column depending on data length
+	for letter := 'A'; letter <= 'D'; letter++ {
+		f.SetColWidth("Sheet1", string(letter), string(letter), 20)
+	}
+
+	style, err := f.NewStyle(&excelize.Style{
+		Alignment: &excelize.Alignment{
+			Horizontal: "center",
+			Vertical:   "center",
+		},
+	})
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	// apply after startrow
+	f.SetCellStyle("Sheet1", "A1", fmt.Sprintf("D%d", len(data)+1), style)
 
 	// make this download able
 	uuid := time.Now().Format("20060102150405")
